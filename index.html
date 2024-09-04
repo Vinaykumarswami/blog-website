@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <div id="chat-widget" class="chat-container">
+        <div id="chat-header" class="chat-header">communication</div>
+        <div id="chat-body" class="chat-body">
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Type your message..." class="chat-input">
+                <button id="send-btn" class="chat-send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+       
+    </script>
+    <script>
+       const socket = new WebSocket('ws://localhost:8080');
+
+document.getElementById('chat-header').addEventListener('click', function() {
+    const chatBody = document.getElementById('chat-body');
+    chatBody.style.display = chatBody.style.display === 'none' ? 'block' : 'none';
+});
+
+socket.onmessage = function(event) {
+    const message = event.data;
+
+    if (typeof message === 'string') {
+        displayMessage(message);
+    } else {
+        const reader = new FileReader();
+        reader.onload = function() {
+            displayMessage(reader.result);
+        };
+        reader.readAsText(message);
+    }
+};
+
+function displayMessage(message) {
+    const chatMessages = document.getElementById('chat-messages');
+    const newMessage = document.createElement('p');
+    newMessage.textContent = message;
+    chatMessages.appendChild(newMessage);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+document.getElementById('send-btn').addEventListener('click', function() {
+    const chatInput = document.getElementById('chat-input');
+    const message = chatInput.value;
+    socket.send(message);
+    displayMessage('You: ' + message);
+    chatInput.value = '';
+});
+
+document.getElementById('chat-input').addEventListener('keypress', function(e) {
+    if (e.which === 13) { // Enter key pressed
+        document.getElementById('send-btn').click();
+    }
+});
+
+
+    </script>
+</body>
+</html>
